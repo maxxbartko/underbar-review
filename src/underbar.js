@@ -166,8 +166,25 @@
   //   }); // should be 5, regardless of the iterator function passed in
   //          No accumulator is given so the first element is used.
   _.reduce = function(collection, iterator, accumulator) {
+    iterator = iterator || _.identity;
+//if accumulator exists, accumulator, if not, then starting value and starting value
+  //and starting value is not passed to iterator
 
+// if(accumulator === undefined) then iterator(collection[i])
+   var testArr = collection.slice(0,collection.length);
+
+   if(accumulator === undefined){
+     accumulator = collection[0];
+     testArr.shift();
+   }
+  
+    _.each(testArr, function(v){
+      return accumulator = iterator(accumulator, v);
+    });
+
+    return accumulator;
   };
+
 
   // Determine if the array or object contains a given value (using `===`).
   _.contains = function(collection, target) {
