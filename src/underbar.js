@@ -190,7 +190,9 @@
   _.contains = function(collection, target) {
     // TIP: Many iteration problems can be most easily expressed in
     // terms of reduce(). Here's a freebie to demonstrate!
-    return _.reduce(collection, function(wasFound, item) {
+    var testArr = collection;
+    if (!Array.isArray(collection)) {testArr = Object.values(collection);}
+    return _.reduce(testArr, function(wasFound, item) {
       if (wasFound) {
         return true;
       }
@@ -201,13 +203,21 @@
 
   // Determine whether all of the elements match a truth test.
   _.every = function(collection, iterator) {
-    // TIP: Try re-using reduce() here.
+    iterator = iterator || _.identity;
+    return _.reduce(collection, function(acc, v) {
+      if(iterator === _.identity) {return !!acc && !!v;}
+      else {return acc && iterator(v);}
+    }, true);
   };
 
   // Determine whether any of the elements pass a truth test. If no iterator is
   // provided, provide a default one
   _.some = function(collection, iterator) {
     // TIP: There's a very clever way to re-use every() here.
+    iterator = iterator || _.identity;
+   return !_.every(collection, function(v){
+      return !!iterator(v) === false;
+    });
   };
 
 
@@ -230,11 +240,27 @@
   //     bla: "even more stuff"
   //   }); // obj1 now contains key1, key2, key3 and bla
   _.extend = function(obj) {
+  //for loop through and adds the property/value
+    for(var i = 1; i < arguments.length; i++){
+      for(var prop in arguments[i]){
+        obj[prop] = arguments[i][prop];
+      }
+    }
+    return obj;
   };
 
   // Like extend, but doesn't ever overwrite a key that already
   // exists in obj
   _.defaults = function(obj) {
+ // extend, but only if !Obj.hasOwnProperty
+  for(var i = 1; i < arguments.length; i++){
+      for(var prop in arguments[i]){
+        if(!obj.hasOwnProperty(prop)){
+          obj[prop] = arguments[i][prop];
+        }
+      }
+    }
+    return obj;
   };
 
 
@@ -278,6 +304,19 @@
   // already computed the result for the given argument and return that value
   // instead if possible.
   _.memoize = function(func) {
+  //object arguments as the key and result as the values
+  //check if object has property, if so, call it, if not, run function
+  var checked = {};
+  return function(){
+    var result;
+    var args = JSON.stringify(arguments);
+    if(!checked.hasOwnProperty(args)){
+      result = func.apply(this, arguments);
+      checked[args] = result;
+    }
+    result = checked[args];
+    return result;
+    }
   };
 
   // Delays a function for the given number of milliseconds, and then calls
@@ -287,6 +326,13 @@
   // parameter. For example _.delay(someFunction, 500, 'a', 'b') will
   // call someFunction('a', 'b') after 500ms
   _.delay = function(func, wait) {
+    var argsArr = [];
+    for(var i = 2; i < arguments.length; i++){
+      argsArr.push(arguments[i]);
+    }
+    return setTimeout(function(){
+      func.apply(this, argsArr);
+    }, wait);
   };
 
 
@@ -301,6 +347,18 @@
   // input array. For a tip on how to make a copy of an array, see:
   // http://mdn.io/Array.prototype.slice
   _.shuffle = function(array) {
+    var indexArr = [];
+    var resultArr = [];
+    for(var i = 0; i < array.length; i++){
+      indexArr.push(i);
+    }
+    var rand;
+    while(indexArr.length){
+      rand = Math.floor(Math.random() * indexArr.length)
+      var num = indexArr.splice(rand,1);
+      resultArr.push(array[num[0]]);
+    }
+    return resultArr;    
   };
 
 
